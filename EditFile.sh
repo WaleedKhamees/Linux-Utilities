@@ -5,13 +5,16 @@
 # TryExec=st -e nvim
 # Exec=st -e nvim %F
 
-sudo setsid updatedb & disown
-st -e sh -c '
+if [ -z "pgrep -f updatedb" ]; then
+    sudo setsid updatedb & disown
+fi
+
+st -c "centered"  -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
 case $where in
     "special")
         regex="^$HOME/(workshop"
-        directories=$(cat $HOME/dotfiles/scripts/dirs.txt)
+        directories=$(cat $HOME/dotfiles/Linux-Utilities/dirs.txt)
         for dir in $directories; do
             regex="$regex|$dir"
         done
@@ -31,4 +34,5 @@ if [ ! -f "$target" ]; then
     exit 1
 fi
 xdg-open "$target"
+exit 1
 '

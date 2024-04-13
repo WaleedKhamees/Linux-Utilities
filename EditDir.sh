@@ -3,13 +3,16 @@
 # regex="^$HOME/(Audio|Music|workshop|shows).*"
 # target=$(plocate -0 --regex "$regex" | xargs -0 dirname | uniq | fzf --border --preview "tree -C {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
 
-sudo setsid updatedb & disown
+if [ -z "pgrep -f updatedb" ]; then
+    sudo setsid updatedb & disown
+fi
+
 st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
 case $where in
     "special")
         regex="^$HOME/(workshop"
-        directories=$(cat $HOME/dotfiles/)
+        directories=$(cat $HOME/dotfiles/Linux-Utilities/dirs.txt)
         for dir in $directories; do
             regex="$regex|$dir"
         done

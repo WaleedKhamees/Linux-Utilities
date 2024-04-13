@@ -12,7 +12,10 @@
 # If you give it the -o flag for ocr, it needs tesseract
 
 
-mode=$(echo -e "Select\nWindow\nAll" | dmenu -p "What?")
+mode=$(echo -e "Select\nWindow\nAll" | dmenu -p "ScreenShot Away!")
+
+[ -z "$mode" ] && exit 1
+
 save=$(echo -e "No\nYes" | dmenu -p "save screenshot?")
 
 

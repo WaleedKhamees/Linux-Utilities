@@ -2,4 +2,7 @@ Audio
 Music
 shows
 Downloads
-courses
+Courses
+Videos
+dotfiles/Linux-Utilities
+dotfiles/suckless
