@@ -3,9 +3,9 @@
 # regex="^$HOME/(Audio|Music|workshop|shows).*"
 # target=$(plocate -0 --regex "$regex" | xargs -0 dirname | uniq | fzf --border --preview "tree -C {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
 
-if [ -z "pgrep -f updatedb" ]; then
-    sudo setsid updatedb & disown
-fi
+# if [ -z "pgrep -f updatedb" ]; then
+sudo setsid updatedb & disown
+# fi
 
 st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
@@ -28,11 +28,16 @@ if [ -z "$target" ]; then
     exit 0;
 fi 
 
-program=$(echo -e "ranger\nnvim\ncode" | fzf --border);
+program=$(echo -e "ranger\nnvim\ncode\nbookmark" | fzf --border);
 cd "$target";
 if [ "$program" = "nvim" ]; then
   tmux new-session -d -s "edit" "exec /bin/bash -c nvim"
   tmux attach-session -t "edit"
+fi
+
+if [ "$program" = "bookmark" ]; then
+  echo "$target" >> $HOME/dotfiles/Linux-Utilities/BookmarkDirs.txt
+  exit 1;
 fi
 
 $program .;

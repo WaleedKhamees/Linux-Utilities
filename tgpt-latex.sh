@@ -34,17 +34,20 @@ if [[ -z $question ]]; then
 fi
 
 if ! echo "$old_questions" | grep -q "$question"; then
-  answer=$(tgpt -w "write your answer as a latex document, make the margin smaller, increase default font size, write the question at the beginning, write nothing but the document, and write it raw without code block, and write all what you know about this topic in detail include equations and dive deep in answering the question:  $question?")
+  answer=$(tgpt -w "write your answer as a latex document without code block and without any additional commentary, make the margin smaller, increase default font size use characters for ordered points, write the question at the beginning, write nothing but the document,  and write all what you know about this topic in details include equations and dive deep in answering the prompt:  $question?")
 
-  echo $answer > /tmp/answer.tex
+
+  echo "$answer" > /tmp/"$question".tex
+  sed -i 's/```.[^ ]*//g;s/```//g' /tmp/"$question".tex
+  answer=$(cat /tmp/"$question".tex)
+  
 
   echo "$answer" | pdflatex -jobname="$question" -output-directory=/tmp/ > /dev/null
 
 
 fi 
 
-echo "$question" > /tmp/latex-questions.txt
-echo "$old_questions" >> /tmp/latex-questions.txt
+echo -e "$question\n$old_questions" | uniq > /tmp/latex-questions.txt
 
 
 zathura /tmp/"$question".pdf

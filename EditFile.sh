@@ -9,7 +9,7 @@ if [ -z "pgrep -f updatedb" ]; then
     sudo setsid updatedb & disown
 fi
 
-st -c "centered"  -e sh -c '
+st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
 case $where in
     "special")
@@ -27,12 +27,22 @@ case $where in
 esac
 
 dir=$(echo $target | xargs -0 dirname)
+program=$(echo -e "xdg-open\nbookmark" | fzf --border)
 
 cd "$dir"
 if [ ! -f "$target" ]; then
     echo "File does not exist"
     exit 1
 fi
-xdg-open "$target"
+
+case $program in
+    "xdg-open")
+        xdg-open "$target"
+    ;;
+    "bookmark")
+        echo "$target" >> $HOME/dotfiles/Linux-Utilities/FileBookmark.txt
+    ;;
+esac
+
 exit 1
 '

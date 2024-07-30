@@ -3,6 +3,9 @@ Music
 shows
 Downloads
 Courses
+Jobs
+Documents
+screenshots
 Videos
 dotfiles/Linux-Utilities
 dotfiles/suckless

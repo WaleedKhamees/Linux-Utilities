@@ -18,6 +18,8 @@ mode=$(echo -e "Select\nWindow\nAll" | dmenu -p "ScreenShot Away!")
 
 save=$(echo -e "No\nYes" | dmenu -p "save screenshot?")
 
+[ -z "$save" ] && exit 1
+
 
 path="$HOME/screenshots"
 command -v maim > /dev/null && screenshooter="maim" || ( echo -n "You need to install maim\nhttps://github.com/naelstrof/maim" && exit 1 )

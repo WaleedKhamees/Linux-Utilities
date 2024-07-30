@@ -59,9 +59,11 @@ download_playlist() {
 case $option in 
   "Video")
     download_video
+    notify-send "Downloaded" "Downloaded the video"
     ;;
   "Playlist")
     download_playlist
+    notify-send "Downloaded" "Downloaded the playlist"
     ;;
-
 esac
+
