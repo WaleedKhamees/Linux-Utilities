@@ -12,34 +12,38 @@ if [[ ! -s "$dirFileName" ]]; then
   exit 1
 fi
 
-sort -u "$dirFileName" -o "$dirFileName"
+while true; do
+  sort -u "$dirFileName" -o "$dirFileName"
 
-dirs=$(cat "$dirFileName")
+  dirs=$(cat "$dirFileName")
 
-dir=$(echo -e "$dirs" | fzy)
-[[ -z "$dir" ]] && exit 0
-program=$(echo -e "ranger\ntmux\nnvim\ncode\ncd\nzeditor\nremove-bookmark" | fzy)
+  dir=$(echo -e "$dirs" | fzf --border --reverse --prompt "Directory: " --preview "tree -C {}" --preview-window "down,70%,border-top,+{2}+3/3,~3")
+  [[ -z "$dir" ]] && exit 0
+  program=$(echo -e "cd\nranger\ntmux\nnvim\ncode\nzeditor\nremove-bookmark" | fzf --border --reverse --prompt "Program: ")
 
-if [[ -z "$dir" ]]; then
-  exit 0
-fi
+  if [[ -z "$dir" ]]; then
+    exit 0
+  fi
 
-cd "$dir"
+  cd "$dir"
 
-case "$program" in
-  "code" | "zeditor")
-    "$program" "$dir"
-    ;;
-  "remove-bookmark")
-    pattern="\#$dir#d"
-    sed -i "$pattern" "$dirFileName"
-    ;;
-  "tmux")
-    tmux new-session -d -s "edit" "exec /bin/bash -c nvim"
-    tmux attach-session -t "edit"
-    ;;
-  *)
-    "$program" "$dir"
-    ;;
-esac
-
+  case "$program" in
+    "code" | "zeditor")
+      "$program" "$dir"
+      ;;
+    "remove-bookmark")
+      pattern="\#$dir#d"
+      sed -i "$pattern" "$dirFileName"
+      ;;
+    "tmux")
+      tmux new-session -d -s "edit" "exec /bin/bash -c nvim"
+      tmux attach-session -t "edit"
+      ;;
+    "cd")
+      /bin/bash
+      ;;
+    *)
+      "$program" "$dir"
+      ;;
+  esac
+done 

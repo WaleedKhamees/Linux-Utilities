@@ -17,9 +17,9 @@ sort -u "$bookmarkFileName" -o "$bookmarkFileName"
 
 files=$(cat "$bookmarkFileName")
 
-file=$(echo -e "$files" | fzy)
+file=$(echo -e "$files" | fzf --reverse --border --prompt "File: " --preview "bat --color=always -n {}" --preview-window "down,70%,border-top,+{2}+3/3,~3")
 [[ -z "$file" ]] && exit 0
 
-cd "$file"
+cd $(dirname "$file")
 
 nvim "$file"

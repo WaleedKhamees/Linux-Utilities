@@ -1,4 +1,5 @@
 Audio
+Sync
 Music
 shows
 Downloads

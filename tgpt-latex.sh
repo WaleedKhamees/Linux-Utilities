@@ -1,4 +1,4 @@
-#!/bin/bash
+  #!/bin/bash
 
 check_dependencies() {
     if ! command -v dmenu &> /dev/null; then
@@ -11,43 +11,40 @@ check_dependencies() {
         exit 1
     fi
 
-    if ! command -v pdflatex &> /dev/null; then
-        notify-send -u "critical" -t 1000 "pdflatex is not installed"
-        exit 1
-    fi
-
-    if ! command -v zathura &> /dev/null; then
-        notify-send -u "critical" -t 1000 "zathura is not installed"
+    if ! command -v pandoc &> /dev/null; then
+        notify-send -u "critical" -t 1000 "pandoc is not installed"
         exit 1
     fi
 }
 check_dependencies
 
+old_questions=$(cat /tmp/markdown-questions.txt)
 
-old_questions=$(cat /tmp/latex-questions.txt)
-
-question=$(echo -e "$old_questions" | dmenu -l 3 -p "Ask in LaTeX:")
-
+question=$(echo -e "$old_questions" | dmenu -l 3 -p "Ask in Markdown:")
 
 if [[ -z $question ]]; then
     exit 1
 fi
 
 if ! echo "$old_questions" | grep -q "$question"; then
-  answer=$(tgpt -w "write your answer as a latex document without code block and without any additional commentary, make the margin smaller, increase default font size use characters for ordered points, write the question at the beginning, write nothing but the document,  and write all what you know about this topic in details include equations and dive deep in answering the prompt:  $question?")
+  answer=$(tgpt -w "Please write your answer in Markdown format. Include headers, and any other Markdown elements as needed, Write nothing but the Markdown content. 
 
+Question:
+$question?")
 
-  echo "$answer" > /tmp/"$question".tex
-  sed -i 's/```.[^ ]*//g;s/```//g' /tmp/"$question".tex
-  answer=$(cat /tmp/"$question".tex)
+  echo "$answer" > /tmp/"$question".md
+  sed -i '1{/^```.[^ ]*/d};$ {/^```/d}' /tmp/"$question".md
+  answer=$(cat /tmp/"$question".md)
+
+    pandoc /tmp/"$question".md -o /tmp/"$question".pdf \
+    --pdf-engine=xelatex \
+    -V geometry:margin=0.5in \
+    -V fontsize=12pt 
   
+fi
 
-  echo "$answer" | pdflatex -jobname="$question" -output-directory=/tmp/ > /dev/null
+echo -e "$question\n$old_questions" | uniq > /tmp/markdown-questions.txt
 
-
-fi 
-
-echo -e "$question\n$old_questions" | uniq > /tmp/latex-questions.txt
+xdg-open /tmp/"$question".pdf
 
 
-zathura /tmp/"$question".pdf

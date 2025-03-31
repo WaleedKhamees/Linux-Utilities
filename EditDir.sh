@@ -4,8 +4,8 @@
 # target=$(plocate -0 --regex "$regex" | xargs -0 dirname | uniq | fzf --border --preview "tree -C {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
 
 # if [ -z "pgrep -f updatedb" ]; then
-sudo setsid updatedb & disown
 # fi
+sudo setsid updatedb & disown
 
 st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
@@ -36,7 +36,7 @@ if [ "$program" = "nvim" ]; then
 fi
 
 if [ "$program" = "bookmark" ]; then
-  echo "$target" >> $HOME/dotfiles/Linux-Utilities/BookmarkDirs.txt
+  echo "$target" >> $HOME/dotfiles/Linux-Utilities/DirBookmarks.txt
   exit 1;
 fi
 

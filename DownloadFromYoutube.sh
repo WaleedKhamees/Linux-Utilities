@@ -8,13 +8,13 @@ download_video() {
   quality=$(echo -e "high\nmedium\naudio" | dmenu -p "Choose quality?")
   case $quality in 
     "high")
-      $TERMINAL sh -c "$ytdlp -f 22 -o \"Videos/%(title)s.%(ext)s\" $url;read"
+      $TERMINAL $ytdlp -f 136+140 -o "Videos/%(title)s.%(ext)s" $url
       ;;
     "medium")
-      $TERMINAL sh -c "$ytdlp -f 18 -o \"Videos/%(title)s.%(ext)s\" $url;read"
+      $TERMINAL $ytdlp -f 18 -o "Videos/%(title)s.%(ext)s" $url
       ;;
     "audio")
-      $TERMINAL sh -c "$ytdlp -x --audio-format mp3 -o \"Audio/%(title)s.%(ext)s\" $url;read"
+      $TERMINAL $ytdlp -x --audio-format mp3 -o "Audio/%(title)s.%(ext)s" $url
       ;;
   esac
 }
@@ -26,29 +26,29 @@ download_playlist() {
   case $quality in 
     "high")
       if [ -z $from ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 22 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" $url"
+        $TERMINAL $ytdlp --yes-playlist -f 136+140 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" $url
       elif [ -z $to ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 22 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from $url"
+        $TERMINAL $ytdlp --yes-playlist -f 136+140 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from $url
       else 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 22 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from --playlist-end $to $url"
+        $TERMINAL $ytdlp --yes-playlist -f 136+140 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from --playlist-end $to $url
       fi
       ;;
     "medium")
       if [ -z $from ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 18 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" $url"
+        $TERMINAL $ytdlp --yes-playlist -f 18 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" $url
       elif [ -z $to ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 18 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from $url"
+        $TERMINAL $ytdlp --yes-playlist -f 18 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from $url
       else 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 18 -o \"Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from --playlist-end $to $url"
+        $TERMINAL $ytdlp --yes-playlist -f 18 -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from --playlist-end $to $url
       fi
       ;;
     "audio")
       if [ -z $from ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 250 -o \"Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" $url"
+        $TERMINAL $ytdlp --yes-playlist -f 250 -o "Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" $url
       elif [ -z $to ]; then 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 250 -o \"Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from $url"
+        $TERMINAL $ytdlp --yes-playlist -f 250 -o "Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from $url
       else 
-        $TERMINAL sh -c "$ytdlp --yes-playlist -f 250 -o \"Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s\" --playlist-start $from --playlist-end $to $url"
+        $TERMINAL $ytdlp --yes-playlist -f 250 -o "Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" --playlist-start $from --playlist-end $to $url
       fi
       ;;
   esac

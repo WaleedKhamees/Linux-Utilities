@@ -42,7 +42,8 @@ case "$mode" in
 			maim -s "$file"
 		;;
 	"Select")
-			maim -s -c 0.41,0.62,0.42,0.2 -l -u "$file"
+     flameshot gui -r | xclip -selection clipboard -t image/png
+			# maim -s -c 0.41,0.62,0.42,0.2 -l -u "$file"
 		;;
 	*)
 			maim "$file"
@@ -51,8 +52,5 @@ esac
 
 
 
-if [ -f "$file" ]; then
-		# Copies the image to your clipboard (ctrl + v)
-    xclip -selection clipboard -target image/png -i "$file"
-    [[ "$save" == "No" ]] && rm $file 
-fi
+xclip -selection clipboard -t image/png -o > $file
+[[ "$save" == "No" ]] && rm "$file" 
