@@ -1,53 +1,129 @@
 #!/bin/bash
 
-functions="merge SRT with MP4\nreplace character in filename with another character"
+functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules"
 
 merge () { 
   current_dir=$(pwd)
   
-  files=$(ls | grep -E '\.srt$|\.vtt$')
+  shopt -s nullglob
+  files=( *.srt *.vtt )
 
-  selection=$(echo -e "$files" | fzf --reverse --height 40%)
-
-  if [[ -z "$selection" ]]; then
-    echo "No file selected."
-    exit 1
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "No subtitle files found."
+    return
   fi
 
-  extension="${selection##*.}"
-  filename="${selection%.*}"
+  selection=$(printf "%s\n" "${files[@]}" "all" | fzf --reverse --height 40%)
 
-  echo "Selected file: $filename.$extension"
 
-  if [ "$extension" == "vtt" ]; then
-    ffmpeg -i "$selection" "${filename}.srt"
-  fi
+  case $selection in 
+    "all")
 
-  srt="${filename}.srt"
-  mp4="${filename}.mp4"
+        for file in "${files[@]}"; do
+          extension="${file##*.}"
+          filename="${file%.*}"
 
-  if [ ! -f "$mp4" ]; then
-    echo "Error: Corresponding MP4 file ($mp4) not found."
-    exit 1
-  fi
+          echo "file: \"$file\""
 
-  ffmpeg -i "$mp4" -i "$srt" -c copy -c:s srt "${filename}.mkv"
+          if [ "$extension" == "vtt" ]; then
+            ffmpeg -i "$file" "${filename}.srt"
+          fi
 
-  read -p "Do you want to delete the original files? [y/n]: " -r reply
+          srt="$current_dir/${filename}.srt"
+          mp4="$current_dir/${filename}.mp4"
 
-  if [ "$reply" == "y" ]; then
-    rm "$mp4" "$srt"
-    [ "$extension" == "vtt" ] && rm "$selection"  # Remove original VTT if converted
-  fi
+          if [ ! -f "$mp4" ]; then
+            echo "Error: Corresponding MP4 file ($mp4) not found."
+            return 1
+          fi
+
+          ffmpeg -i "$mp4" -i "$srt" -c copy -c:s srt "${filename}.mkv"
+        done
+      
+        read -p "Do you want to delete the original files? [y/n]: " -r reply
+
+        if [ "$reply" == "y" ]; then
+          for file in "${files[@]}"; do
+            extension="${file##*.}"
+            filename="${file%.*}"
+
+            srt="$current_dir/${filename}.srt"
+            mp4="$current_dir/${filename}.mp4"
+            vtt="$current_dir/${filename}.vtt"
+
+            rm "$mp4" "$srt"
+            [ "$extension" == "vtt" ] && rm "$vtt"  # Remove original VTT if converted
+          done
+        fi
+
+      ;;
+
+    *)
+      extension="${selection##*.}"
+      filename="${selection%.*}"
+
+      echo "Selected file: $filename.$extension"
+
+      if [ "$extension" == "vtt" ]; then
+        ffmpeg -i "$selection" "${filename}.srt"
+      fi
+
+      srt="$current_dir/${filename}.srt"
+      mp4="$current_dir/${filename}.mp4"
+
+      if [ ! -f "$mp4" ]; then
+        echo "Error: Corresponding MP4 file ($mp4) not found."
+        exit 1
+      fi
+
+      ffmpeg -i "$mp4" -i "$srt" -c copy -c:s srt "${filename}.mkv"
+
+      read -p "Do you want to delete the original files? [y/n]: " -r reply
+
+      if [ "$reply" == "y" ]; then
+        rm "$mp4" "$srt"
+        [ "$extension" == "vtt" ] && rm "$selection"  # Remove original VTT if converted
+      fi
+
+    ;;
+
+  esac
+
 }
 
 replaceCharInFilenameWithAnotherChar() {
-  read -p "Enter the character you want to replace: " -r char1
-  read -p "Enter the character you want to replace with: " -r char2
+  shopt -s nullglob  # Prevent errors if no files match
 
-  for file in *$char1*; do
-    mv "$file" "${file//$char1/$char2}"
+  read -p "Enter the character you want to replace: " -r char1
+  IFS= read -r -p "Enter the character you want to replace with: " char2  # Preserve spaces
+
+  if [[ "$char1" == "." ]]; then
+    char1='\.'  # Ensure dot is treated as a literal character
+  fi
+
+  for file in *; do
+    [[ -d "$file" ]] && continue  # Skip directories
+
+    base="${file%.*}"  
+    ext="${file##*.}" 
+    regexcommand="s/${char1}/${char2}/g"
+    new_base="$(echo "$base" | sed "$regexcommand")"
+    new_name="${new_base}.${ext}"
+
+
+    if [[ "$file" != "$new_name" ]]; then
+      mv "$file" "$new_name"
+      echo "Renamed: $file → $new_name"
+    else
+      echo "No change needed for $file"
+    fi
+
   done
+
+}
+
+removeNodeModules() {
+  find . -name "node_modules" -type d -prune -exec rm -rfv '{}' +
 }
 
 function_selected=$(echo -e "$functions" | fzf --reverse --height 40%)
@@ -58,6 +134,9 @@ case $function_selected in
     ;;
   "replace character in filename with another character")
     replaceCharInFilenameWithAnotherChar
+    ;;
+  "remove node_modules")
+    removeNodeModules
     ;;
 esac
 
