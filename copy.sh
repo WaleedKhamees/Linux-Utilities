@@ -5,7 +5,7 @@ file="$base/copy.txt"
 
 choices=""
 
-while IFS= read -r line; do
+while IFS= read -r line; 
     choices="$choices\n$(echo "$line" | cut -f 1 -d '`')" 
 done < "$file"
 
