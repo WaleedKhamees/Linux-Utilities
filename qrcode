@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Temporary screenshot file
+TMPFILE=$(mktemp /tmp/qr_screenshot_XXXXXX.png)
+
+# Take screenshot using maim (select area with mouse)
+maim -s -c 0.41,0.62,0.42,0.2 -l -u "$TMPFILE"
+
+
+# Scan the QR code
+QR_OUTPUT=$(zbarimg --quiet --raw "$TMPFILE")
+
+# Clean up
+rm "$TMPFILE"
+
+# Check and copy to clipboard
+if [[ -n "$QR_OUTPUT" ]]; then
+    echo "$QR_OUTPUT" | xclip -selection clipboard
+    echo "✅ QR code detected and copied to clipboard:"
+    echo "$QR_OUTPUT"
+else
+    echo "❌ No QR code detected."
+fi
