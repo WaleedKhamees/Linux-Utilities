@@ -20,7 +20,4 @@ if ! echo "$previous_questions" | grep -q "$edited_question"; then
   echo "$edited_question" > /tmp/answer-any-question-tmp.txt
   # Add the rest of the questions
   echo "$previous_questions" >> /tmp/answer-any-question-tmp.txt
-fi 
-
-
-
+fi
