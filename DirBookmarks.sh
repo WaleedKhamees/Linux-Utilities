@@ -3,8 +3,8 @@
 dirFileName="$HOME/dotfiles/Linux-Utilities/DirBookmarks.txt"
 
 if [[ ! -f "$dirFileName" ]]; then
-  echo "File not found: $dirFileName"
-  exit 1
+  notify-send "Directory not found creating an empty one"
+  touch $dirFileName
 fi
 
 if [[ ! -s "$dirFileName" ]]; then
@@ -46,4 +46,4 @@ while true; do
       "$program" "$dir"
       ;;
   esac
-done 
+done

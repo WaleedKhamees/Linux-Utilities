@@ -6,7 +6,7 @@ option=$(echo -e "Video\nPlaylist" | dmenu -p "What do you want to download?")
 download_video() {
   url=$(xclip -o clipboard)
   quality=$(echo -e "high\nmedium\naudio" | dmenu -p "Choose quality?")
-  case "$quality" in 
+  case "$quality" in
     "high")
       $ytdlp -f "bv*[height<=720]+ba/best" -o "Videos/%(title)s.%(ext)s" "$url"
       ;;
@@ -14,7 +14,8 @@ download_video() {
       $ytdlp -f "bv*[height<=360]+ba[abr<=128]/b[height<=360]" -o "Videos/%(title)s.%(ext)s" "$url"
       ;;
     "audio")
-      $ytdlp -f "bestaudio[abr<=128]" -x --audio-format m4a -o "Audio/%(title)s.%(ext)s" "$url"
+      # $ytdlp -f "bestaudio[abr<=128]" -x --audio-format m4a -o "Audio/%(title)s.%(ext)s" "$url"
+      $ytdlp -f ba -o "Audio/%(title)s.%(ext)s" "$url" --exec "ffmpeg -i \"%(filename)s\" \"%(filename)s.m4a\"; rm \"%(filename)s\""
       ;;
   esac
 }
@@ -29,7 +30,7 @@ download_playlist() {
   [ -n "$from" ] && playlist_opts="$playlist_opts --playlist-start $from"
   [ -n "$to" ] && playlist_opts="$playlist_opts --playlist-end $to"
 
-  case "$quality" in 
+  case "$quality" in
     "high")
       $ytdlp --yes-playlist -f "bv*[height<=720]+ba/best" $playlist_opts -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
       ;;
@@ -42,7 +43,7 @@ download_playlist() {
   esac
 }
 
-case $option in 
+case $option in
   "Video")
     download_video
     notify-send "Downloaded" "Downloaded the video"
