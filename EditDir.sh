@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 
 # regex="^$HOME/(Audio|Music|workshop|shows).*"
 # target=$(plocate -0 --regex "$regex" | xargs -0 dirname | uniq | fzf --border --preview "tree -C {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
@@ -7,7 +7,6 @@
 # fi
 sudo setsid updatedb & disown
 
-st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
 case $where in
     "special")
@@ -26,7 +25,7 @@ esac
 
 if [ -z "$target" ]; then
     exit 0;
-fi 
+fi
 
 program=$(echo -e "ranger\nnvim\ncode\nbookmark" | fzf --border);
 cd "$target";
@@ -44,4 +43,3 @@ $program .;
 if [ "$program" != "code" ]; then
   exec /bin/bash
 fi
-'

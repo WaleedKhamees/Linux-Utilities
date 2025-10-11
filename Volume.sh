@@ -21,14 +21,15 @@ toggle_mute() {
 
 # Function to increase the audio volume by a given percentage
 increase_volume() {
-  [ $status = "yes" ] && toggle_mute 
-  future_volume="$(expr "$volume" + "5")" 
+  [ $status = "yes" ] && toggle_mute
+  future_volume="$(expr "$volume" + "5")"
   [ $future_volume -le 100 ] && pactl set-sink-volume @DEFAULT_SINK@ +$1%
+  [ $future_volume -gt 100 ] && pactl set-sink-volume @DEFAULT_SINK@ 100%
 }
 
 # Function to decrease the audio volume by a given percentage
 decrease_volume() {
-  [ $status = "yes" ] && toggle_mute 
+  [ $status = "yes" ] && toggle_mute
   pactl set-sink-volume @DEFAULT_SINK@ -$1%
 }
 

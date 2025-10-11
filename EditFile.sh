@@ -4,12 +4,31 @@
 # update /usr/share/applications/nvim.desktop
 # TryExec=st -e nvim
 # Exec=st -e nvim %F
+#
+previewCommand="
+~/.config/ranger/scope.sh "{}" '$FZF_PREVIEW_COLUMNS' '$FZF_PREVIEW_LINES' /tmp/$file.jpg False
+# img="/tmp/$(basename {})".jpg
+#
+# if [[ -f \"$img\" ]]; then
+#   ueberzug layer --parser bash 2>/dev/null <<EOF
+# {
+#   'action': 'add',
+#   'identifier': 'preview',
+#   'x': 0,
+#   'y': 0,
+#   'width': '$FZF_PREVIEW_COLUMNS',
+#   'height': '$FZF_PREVIEW_LINES',
+#   'path': '$img'
+# }
+# EOF
+# fi
+"
+
 
 if [ -z "pgrep -f updatedb" ]; then
     sudo setsid updatedb & disown
 fi
 
-st -e sh -c '
 where=$(echo -e "special\nall" | fzf --border)
 case $where in
     "special")
@@ -19,7 +38,7 @@ case $where in
             regex="$regex|$dir"
         done
         regex="$regex).*"
-        target=$(plocate --regex "$regex" | fzf --border --preview "bat --color=always -n {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
+        target=$(plocate --regex "$regex" | fzf --border --preview "$previewCommand" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
     ;;
     "all")
         target=$(locate . | fzf --border --preview "bat --color=always -n {}" --preview-window "up,40%,border-bottom,+{2}+3/3,~3")
@@ -45,4 +64,3 @@ case $program in
 esac
 
 exit 1
-'
