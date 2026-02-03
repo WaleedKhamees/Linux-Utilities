@@ -1,49 +1,50 @@
 #!/bin/bash
 
-status="$(pactl get-sink-mute @DEFAULT_SINK@ | cut -d " " -f2)"
-volume_percentage="$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | cut -d $'\n' -f1)"
-volume="${volume_percentage%\%}"
+status="$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}')"
+volume="$(pactl get-sink-volume @DEFAULT_SINK@ | awk 'NR==1{print $5}' | tr -d '%')"
 
-# Function to toggle mute/unmute
 toggle_mute() {
     pactl set-sink-mute @DEFAULT_SINK@ toggle
-    s=""
-    case "$status" in
-        "yes")
-            s="Not muted"
-            ;;
-        "no")
-            s="Muted"
-            ;;
-    esac
-    notify-send -u low -t 1000 "Volume" "Audio is now ${s}"
+    notify-send -u low -t 1000 "Volume" "Mute toggled"
 }
 
-# Function to increase the audio volume by a given percentage
 increase_volume() {
-  [ $status = "yes" ] && toggle_mute
-  future_volume="$(expr "$volume" + "5")"
-  [ $future_volume -le 100 ] && pactl set-sink-volume @DEFAULT_SINK@ +$1%
-  [ $future_volume -gt 100 ] && pactl set-sink-volume @DEFAULT_SINK@ 100%
+    [ "$status" = "yes" ] && pactl set-sink-mute @DEFAULT_SINK@ 0
+
+    if (( volume % 5 == 0 )); then
+        new_volume=$(( volume + 5 ))
+    else
+        new_volume=$(( (volume / 5 + 1) * 5 ))
+    fi
+
+    (( new_volume > 100 )) && new_volume=100
+    pactl set-sink-volume @DEFAULT_SINK@ "${new_volume}%"
 }
 
-# Function to decrease the audio volume by a given percentage
 decrease_volume() {
-  [ $status = "yes" ] && toggle_mute
-  pactl set-sink-volume @DEFAULT_SINK@ -$1%
-}
+    [ "$status" = "yes" ] && pactl set-sink-mute @DEFAULT_SINK@ 0
 
+    if (( volume % 5 == 0 )); then
+        new_volume=$(( volume - 5 ))
+    else
+        new_volume=$(( (volume / 5) * 5 ))
+    fi
+
+    (( new_volume < 0 )) && new_volume=0
+    pactl set-sink-volume @DEFAULT_SINK@ "${new_volume}%"
+}
 
 case "$1" in
-    "up")
-        increase_volume 5
+    up)
+        increase_volume
         ;;
-    "down")
-        decrease_volume 5
+    down)
+        decrease_volume
         ;;
-    "toggle")
+    toggle)
         toggle_mute
         ;;
 esac
+
 pkill -RTMIN+10 dwmblocks
 

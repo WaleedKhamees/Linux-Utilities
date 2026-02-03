@@ -16,9 +16,9 @@ mode=$(echo -e "Select\nWindow\nAll" | dmenu -p "ScreenShot Away!")
 
 [ -z "$mode" ] && exit 1
 
-save=$(echo -e "No\nYes" | dmenu -p "save screenshot?")
+# save=$(echo -e "No\nYes" | dmenu -p "save screenshot?")
 
-[ -z "$save" ] && exit 1
+# [ -z "$save" ] && exit 1
 
 
 path="$HOME/screenshots"
@@ -36,21 +36,18 @@ fi
 filename="$(date +"%Y-%m-%dT%H-%M-%SZ").png"
 file="${path}/${filename}"
 
-
 case "$mode" in
-	"Window")
-			maim -s "$file"
-		;;
-	"Select")
-     flameshot gui -r | xclip -selection clipboard -t image/png
-			# maim -s -c 0.41,0.62,0.42,0.2 -l -u "$file"
-		;;
-	*)
-			maim "$file"
-		;;
+    "Window")
+        maim -s "$file"
+        xclip -selection clipboard -t image/png "$file"
+        ;;
+    "Select")
+        flameshot gui -r | tee "$file" | xclip -selection clipboard -t image/png
+        ;;
+    *)
+        maim "$file"
+        xclip -selection clipboard -t image/png "$file"
+        ;;
 esac
 
-
-
-xclip -selection clipboard -t image/png -o > $file
-[[ "$save" == "No" ]] && rm "$file" 
+# [[ "$save" == "No" ]] && rm "$file" 

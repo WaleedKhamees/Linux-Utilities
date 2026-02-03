@@ -1,6 +1,6 @@
 #!/bin/bash
 
-functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules"
+functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules\nconvert webm to mp3\ndelete files without extension"
 
 merge () { 
   current_dir=$(pwd)
@@ -126,6 +126,22 @@ removeNodeModules() {
   find . -name "node_modules" -type d -prune -exec rm -rfv '{}' +
 }
 
+convertWebmToMp3() {
+    webm_files=$(find . -name "*.webm")
+    file=$(echo "$webm_files" | fzf --reverse --height 40%)
+    [[ -z "$file" ]] && return
+    ffmpeg -i "$file" -vn -acodec libmp3lame -ab 192k "${file%.*}.mp3"
+}
+
+deleteFilesWithoutExtension() {
+  for f in *; do
+    if [[ -f "$f" && "$f" != *.* ]]; then
+        echo "Deleting: $f"
+        rm -- "$f"
+    fi
+  done
+}
+
 function_selected=$(echo -e "$functions" | fzf --reverse --height 40%)
 
 case $function_selected in 
@@ -137,6 +153,12 @@ case $function_selected in
     ;;
   "remove node_modules")
     removeNodeModules
+    ;;
+  "convert webm to mp3")
+      convertWebmToMp3
+    ;;
+  "delete files without extension")
+      deleteFilesWithoutExtension
     ;;
 esac
 
