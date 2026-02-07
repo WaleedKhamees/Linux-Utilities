@@ -50,8 +50,12 @@ merge () {
             srt="$current_dir/${filename}.srt"
             mp4="$current_dir/${filename}.mp4"
             vtt="$current_dir/${filename}.vtt"
+            mkv="$current_dir/${filename}.mkv"
 
-            rm "$mp4" "$srt"
+            if [ -f "$mkv" ]; then
+                rm "$mp4" "$srt"
+            fi
+
             [ "$extension" == "vtt" ] && rm "$vtt"  # Remove original VTT if converted
           done
         fi
