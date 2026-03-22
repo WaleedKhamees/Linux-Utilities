@@ -1,6 +1,40 @@
 #!/bin/bash
 
-functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules\nconvert webm to mp3\ndelete files without extension"
+functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules\nconvert webm to mp3\ndelete files without extension\nupscale and sharpen slides"
+
+upscaleSlides() {
+    shopt -s nullglob
+    # Supporting common image formats for slides
+    files=( *.jpg *.jpeg *.png *.webp )
+
+    if [[ ${#files[@]} -eq 0 ]]; then
+        echo "No image files found."
+        return
+    fi
+
+    selection=$(printf "%s\n" "${files[@]}" "all" | fzf --reverse --height 40% --header "Select slide(s) to upscale to 1080p")
+
+    case $selection in
+        "all")
+            mkdir -p upscaled
+            for file in "${files[@]}"; do
+                echo "Processing: $file"
+                # Mitchell filter + Distort + Adaptive Sharpen for crisp text
+                magick "$file" -filter Mitchell -distort Resize 1920x1080 -despeckle -adaptive-sharpen 0x3 "upscaled/${file%.*}.png"
+            done
+            echo "Finished! Check the 'upscaled' folder."
+            ;;
+        "")
+            return
+            ;;
+        *)
+            filename="${selection%.*}"
+            echo "Upscaling $selection..."
+            magick "$selection" -filter Mitchell -distort Resize 1920x1080 -despeckle -adaptive-sharpen 0x3 "${filename}_1080p.png"
+            echo "Done: ${filename}_1080p.png"
+            ;;
+    esac
+}
 
 merge () { 
   current_dir=$(pwd)
@@ -163,6 +197,9 @@ case $function_selected in
     ;;
   "delete files without extension")
       deleteFilesWithoutExtension
+    ;;
+  "upscale and sharpen slides")
+      upscaleSlides
     ;;
 esac
 
