@@ -1,6 +1,40 @@
 #!/bin/bash
 
-functions="merge SRT with MP4\nreplace character in filename with another character\nremove node_modules\nconvert webm to mp3\ndelete files without extension\nupscale and sharpen slides"
+functions="copy directory (rsync)\nmerge audio with video\nmerge SRT with MP4\nreplace character in filename with another character\nremove node_modules\nconvert webm to mp3\ndelete files without extension\nupscale and sharpen slides"
+
+copyDirRsync() {
+    # 1. Get directories with max depth 4
+    # -not -path '*/.*' hides hidden folders for a cleaner fzf list
+    dirs=$(find . -maxdepth 4 -type d -not -path '*/.*')
+
+    if [[ -z "$dirs" ]]; then
+        echo "No directories found."
+        return
+    fi
+
+    # 2. Select Source
+    src=$(echo "$dirs" | fzf --reverse --height 40% --header "SELECT SOURCE DIRECTORY")
+    [[ -z "$src" ]] && return
+
+    # 3. Select Destination
+    dest=$(echo "$dirs" | fzf --reverse --height 40% --header "SELECT DESTINATION DIRECTORY")
+    [[ -z "$dest" ]] && return
+
+    # 4. Actual Copying
+    echo "Starting transfer: $src -> $dest"
+    rsync -rtvh --progress --modify-window=1 "$src" "$dest"
+
+    # 5. Verification Dry Run (Post-Copy)
+    printf "\n====================================================================\n"
+    printf "DRY RUN (Verification)"
+    printf "\n====================================================================\n"
+    
+    # Running rsync again with --dry-run. 
+    # If everything copied correctly, this should show no further changes needed.
+    rsync -rtvh --progress --modify-window=1 --dry-run "$src" "$dest"
+
+    printf "\nVerification complete.\n"
+}
 
 upscaleSlides() {
     shopt -s nullglob
@@ -32,6 +66,47 @@ upscaleSlides() {
             echo "Upscaling $selection..."
             magick "$selection" -filter Mitchell -distort Resize 1920x1080 -despeckle -adaptive-sharpen 0x3 "${filename}_1080p.png"
             echo "Done: ${filename}_1080p.png"
+            ;;
+    esac
+}
+
+mergeAudio() {
+    current_dir=$(pwd)
+    shopt -s nullglob
+    files=( *.m4a *.mp3 *.webm *.wav )
+    if [[ ${#files[@]} -eq 0 ]]; then
+        echo "No audio files found."
+        return
+    fi
+
+    selection=$(printf "%s\n" "${files[@]}" "all" | fzf --reverse --height 40% --header "Select audio file(s) to merge")
+
+    # $1 is the selected file
+    _merge_audio() {
+        video_file="${1%.*}.mp4"
+        if ! [ -f "$video_file" ]; then
+            video_file="${1%.*}.mkv"
+        fi
+        if ! [ -f "$video_file" ]; then
+            echo "Error: Corresponding video file ($video_file) not found."
+            return 1
+        fi
+        echo "Merging $1 into $video_file..."
+        ffmpeg -i "$video_file" -i "$1" -c copy -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -strict experimental "${video_file}_merged.mkv"
+        echo "Done: $video_file"
+    }
+
+    case $selection in
+        "all")
+            for file in "${files[@]}"; do
+                _merge_audio "$file"
+            done
+            ;;
+        "")
+            return
+            ;;
+        *)
+            _merge_audio "$selection"
             ;;
     esac
 }
@@ -183,23 +258,28 @@ deleteFilesWithoutExtension() {
 function_selected=$(echo -e "$functions" | fzf --reverse --height 40%)
 
 case $function_selected in 
-  "merge SRT with MP4")
-    merge 
+    "merge audio with video")
+        mergeAudio
     ;;
-  "replace character in filename with another character")
-    replaceCharInFilenameWithAnotherChar
+    "merge SRT with MP4")
+        merge 
     ;;
-  "remove node_modules")
-    removeNodeModules
+    "replace character in filename with another character")
+        replaceCharInFilenameWithAnotherChar
     ;;
-  "convert webm to mp3")
-      convertWebmToMp3
+    "remove node_modules")
+        removeNodeModules
     ;;
-  "delete files without extension")
-      deleteFilesWithoutExtension
+    "convert webm to mp3")
+        convertWebmToMp3
     ;;
-  "upscale and sharpen slides")
-      upscaleSlides
+    "delete files without extension")
+        deleteFilesWithoutExtension
+    ;;
+    "upscale and sharpen slides")
+        upscaleSlides
+    ;;
+    "copy directory (rsync)")
+        copyDirRsync
     ;;
 esac
-
