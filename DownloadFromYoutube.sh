@@ -8,10 +8,10 @@ download_video() {
   quality=$(echo -e "high\nmedium\naudio" | dmenu -p "Choose quality?")
   case "$quality" in
     "high")
-      $ytdlp -f "bv*[height<=720]+ba/best" -o "Videos/%(title)s.%(ext)s" "$url"
+      $ytdlp -f "bv*[height<=720]+ba" -o "Videos/%(title)s.%(ext)s" "$url"
       ;;
     "medium")
-      $ytdlp -f "bv*[height<=360]+ba[abr<=128]/b[height<=360]" -o "Videos/%(title)s.%(ext)s" "$url"
+      $ytdlp -f "bv*[height<=360]+ba" -o "Videos/%(title)s.%(ext)s" "$url"
       ;;
     "audio")
       # $ytdlp -f "bestaudio[abr<=128]" -x --audio-format m4a -o "Audio/%(title)s.%(ext)s" "$url"
@@ -32,13 +32,13 @@ download_playlist() {
 
   case "$quality" in
     "high")
-      $ytdlp --yes-playlist -f "bv*[height<=720]+ba/best" $playlist_opts -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
+      $ytdlp --yes-playlist -f "bv*[height<=720]+ba" $playlist_opts -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
       ;;
     "medium")
-      $ytdlp --yes-playlist -f "bv*[height<=360]+ba[abr<=128]/b[height<=360]" $playlist_opts -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
+      $ytdlp --yes-playlist -f "bv*[height<=360]+ba" $playlist_opts -o "Videos/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
       ;;
     "audio")
-      $ytdlp --yes-playlist -f "bestaudio[abr<=128]" -x --audio-format m4a $playlist_opts -o "Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
+      $ytdlp --yes-playlist -f "ba" -x --audio-format m4a $playlist_opts -o "Audio/%(playlist)s/%(playlist_index)s.%(title)s.%(ext)s" "$url"
       ;;
   esac
 }
