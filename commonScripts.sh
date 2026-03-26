@@ -20,6 +20,24 @@ copyDirRsync() {
     dest=$(echo "$dirs" | fzf --reverse --height 40% --header "SELECT DESTINATION DIRECTORY")
     [[ -z "$dest" ]] && return
 
+    # 3.5 rename illegal characters in destination directory
+    find "$src" -depth -name '*[\\:*?"<>|]*' -exec bash -c '
+        for item; do
+            dir=$(dirname "$item")
+            base=$(basename "$item")
+            # Using your preferred replacement character "-" 
+            new_base=$(echo "$base" | sed "s/[\\:*?\"<>|]/-/g")
+            
+            if [ "$base" != "$new_base" ]; then
+                if [ -e "$dir/$new_base" ]; then
+                    echo "Collision: $new_base already exists, skipping $base"
+                else
+                    mv -v "$item" "$dir/$new_base"
+                fi
+            fi
+        done
+    ' _ {} +
+
     # 4. Actual Copying
     echo "Starting transfer: $src -> $dest"
     rsync -rtvh --progress --modify-window=1 "$src" "$dest"
@@ -111,7 +129,7 @@ mergeAudio() {
     esac
 }
 
-merge () { 
+mergeSRTwithMP4 () { 
   current_dir=$(pwd)
   
   shopt -s nullglob
@@ -262,7 +280,7 @@ case $function_selected in
         mergeAudio
     ;;
     "merge SRT with MP4")
-        merge 
+        mergeSRTwithMP4
     ;;
     "replace character in filename with another character")
         replaceCharInFilenameWithAnotherChar
