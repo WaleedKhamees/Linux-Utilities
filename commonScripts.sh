@@ -40,7 +40,7 @@ copyDirRsync() {
 
     # 4. Actual Copying
     echo "Starting transfer: $src -> $dest"
-    rsync -rtvh --progress --modify-window=1 "$src" "$dest"
+    rsync -rtvhL --progress --modify-window=1 "$src" "$dest"
 
     # 5. Verification Dry Run (Post-Copy)
     printf "\n====================================================================\n"
